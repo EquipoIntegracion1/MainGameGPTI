@@ -7,6 +7,10 @@ public class MenuScripts : MonoBehaviour
 {
     public void OnplayButton()
     {
+        SceneManager.LoadScene(1);
+    }
+    public void OnMenuButton()
+    {
         SceneManager.LoadScene(0);
     }
 
