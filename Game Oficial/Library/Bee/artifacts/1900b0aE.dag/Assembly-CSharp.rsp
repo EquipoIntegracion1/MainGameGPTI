@@ -366,6 +366,7 @@
 "Assets/Player/Scripts/GameManager.cs"
 "Assets/Player/Scripts/PlayerController.cs"
 "Assets/Scripts/ScriptsMenu/MenuScripts.cs"
+"Assets/Scripts/ScriptsMenu/ScriptPausa.cs"
 -langversion:9.0
 
 /deterministic
