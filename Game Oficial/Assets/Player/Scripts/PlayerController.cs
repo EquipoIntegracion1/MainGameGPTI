@@ -31,13 +31,22 @@ public class PlayerController : MonoBehaviour
     public bool invertX;
     public bool invertY;
 
+    private float pitch = 0f; // Agrega esto
+
     public GameObject bullet;
     public Transform firePoint;
 
 
     void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Update()
@@ -53,9 +62,9 @@ public class PlayerController : MonoBehaviour
 
         moveInput = horitMove + vertMove;
         moveInput.Normalize();
-        
 
-        if(Input.GetButton("Run")) 
+
+        if (Input.GetButton("Run"))
         {
             moveInput = moveInput * runSpeed;
         }
@@ -68,34 +77,31 @@ public class PlayerController : MonoBehaviour
         moveInput.y = yStore;
 
         //Gravedad
-        moveInput.y += Physics.gravity.y * gravityModifier * Time.deltaTime;
-
-        if (characterController.isGrounded)
+        if (!characterController.isGrounded)
         {
-            moveInput.y = Physics.gravity.y * gravityModifier * Time.deltaTime;
+            moveInput.y += Physics.gravity.y * gravityModifier * Time.deltaTime;
         }
-
-        //canJump = Physics.OverlapSphere(grounCheckPoint.position, .25f, whatIsGround).Length > 0;
 
         canJump = characterController.isGrounded;
 
-        if(canJump)
+        if (canJump)
         {
             canDoubleJump = false;
         }
 
 
         //Salto del jugador
-        if (Input.GetButtonDown("Jump") && canJump) 
+        if (Input.GetButtonDown("Jump") && canJump)
         {
             moveInput.y = jumpPower;
 
             canDoubleJump = true;
-        }else if(canDoubleJump && (Input.GetButtonDown("Jump")))
+        }
+        else if (canDoubleJump && (Input.GetButtonDown("Jump")))
         {
             moveInput.y = jumpPower;
 
-            canDoubleJump = false;  
+            canDoubleJump = false;
         }
 
 
@@ -109,26 +115,27 @@ public class PlayerController : MonoBehaviour
         {
             mauseInput.x = -mauseInput.x;
         }
-        if (invertY)
-        {
-            mauseInput.y = -mauseInput.y;
-        }
+
+        // Actualiza 'pitch' basado en el input del mouse, y luego usa eso para establecer la rotación de la cámara
+        pitch -= mauseInput.y;
+        pitch = Mathf.Clamp(pitch, -90f, 90f);
+
+        camTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
 
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + mauseInput.x, transform.rotation.eulerAngles.z);
 
-        camTransform.rotation = Quaternion.Euler(camTransform.rotation.eulerAngles + new Vector3(-mauseInput.y, 0f, 0f));
-
         //Shooting
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
-            if(Physics.Raycast(camTransform.position, camTransform.forward, out hit, 50f))
+            if (Physics.Raycast(camTransform.position, camTransform.forward, out hit, 50f))
             {
-                if (Vector3.Distance(camTransform.position, hit.point) > 2f);
+                if (Vector3.Distance(camTransform.position, hit.point) > 2f)
                 {
                     firePoint.LookAt(hit.point);
                 }
-            }else
+            }
+            else
             {
                 firePoint.LookAt(camTransform.position + (camTransform.forward * 30f));
             }
@@ -139,5 +146,5 @@ public class PlayerController : MonoBehaviour
 
         anim.SetFloat("moveSpeed", moveInput.magnitude);
         anim.SetBool("onGround", canJump);
-    } 
+    }
 }
